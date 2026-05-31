@@ -4,21 +4,36 @@ import { useState, useEffect, useRef } from "react";
 // 1. API — Groq (Free, No Credit Card, Works in India)
 // ─────────────────────────────────────────────────────────────
 async function askSahara(messages, hinglish = false, userName = "") {
-  const context = userName
+  const context = userName && userName !== "friend"
     ? (hinglish ? `User ka naam ${userName} hai.` : `User's name is ${userName}.`)
     : "";
 
   const systemPrompt = hinglish
     ? `Tu SAHARA hai — ek calm, samajhdar saathi jo tab hoti hai jab cheezein zyada feel hone lagti hain.
 Tu therapist nahi hai. Motivational coach bhi nahi. Tu ek quiet, warm presence hai.
-- Hinglish mein baat kar — jaise real Indian dost karte hain
-- Responses chhote aur warm rakh — lecture mat de kabhi
+
+Kaise respond karna hai:
+- BAHUT chhote responses de — 1-2 lines max jab tak user vent kar raha ho
+- Pehle emotional validation do, advice nahi
+- Jaise: "Yaar that sounds really exhausting." ya "Samajh sakti hoon kyun hurt hua."
+- Kabhi long paragraphs mat likho
+- Kabhi advice lists mat do
+- Sirf tab question pucho jab genuinely zaroorat ho
+- Tone: soft, warm, real — jaise best friend baat kar rahi ho
 - Judge mat kar. Kabhi nahi.
 - Agar lagey koi bohat distress mein hai toh gently iCall ka number do: 9152987821
 ${context}`
     : `You are SAHARA — a calm, understanding companion present when things feel too much.
 You are NOT a therapist. NOT a motivational coach. A quiet, warm presence.
-- Short warm responses. Never lecture. Never give advice lists.
+
+How to respond:
+- Keep responses SHORT — 1-2 lines max while someone is venting
+- Lead with emotional validation, not advice
+- Examples: "That sounds exhausting." / "I understand why that hurt." / "You've been carrying a lot."
+- NEVER write long paragraphs
+- NEVER give advice lists
+- Only ask a question when genuinely needed
+- Tone: soft, warm, real — like a close friend
 - Never judge. Never minimize. Never rush.
 - If someone seems in serious distress, gently mention iCall: 9152987821
 ${context}`;
@@ -32,8 +47,8 @@ ${context}`;
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        max_tokens: 300,
-        temperature: 0.7,
+        max_tokens: 150,
+        temperature: 0.8,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages
@@ -72,27 +87,31 @@ const greeting = (hi) => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 4. Constants
+// 4. Constants — Gauri's updated mood options
 // ─────────────────────────────────────────────────────────────
 const MOOD_OPTIONS = [
-  { val: "low", emoji: "😔", en: "Low", hi: "Theek nahi" },
-  { val: "okay", emoji: "😐", en: "Okay", hi: "Theek" },
-  { val: "good", emoji: "🙂", en: "Good", hi: "Accha" },
+  { val: "numb",         emoji: "😶‍🌫️", en: "Emotionally numb",         hi: "Kuch feel nahi ho raha" },
+  { val: "exhausted",    emoji: "🪫",   en: "Mentally exhausted",        hi: "Dimag thak gaya hai" },
+  { val: "overstimulated",emoji: "😵",  en: "Overstimulated",            hi: "Bahut zyada ho gaya" },
+  { val: "lonely",       emoji: "🫂",   en: "Lonely in a crowd",         hi: "Sab mein bhi akela" },
+  { val: "reassurance",  emoji: "🤍",   en: "Need reassurance",          hi: "Koi bata do sab theek hai" },
+  { val: "unseen",       emoji: "👻",   en: "Feeling unseen",            hi: "Koi samajh nahi raha" },
+  { val: "guilty",       emoji: "😔",   en: "Guilty for no reason",      hi: "Bina wajah guilt" },
+  { val: "avoiding",     emoji: "🚪",   en: "Avoiding everyone",         hi: "Sab se door rehna hai" },
+  { val: "overthinking", emoji: "🌀",   en: "Can't stop overthinking",   hi: "Dimag band nahi ho raha" },
+  { val: "disconnected", emoji: "🌫️",  en: "Feeling disconnected",      hi: "Sab se cut off feel ho raha hai" },
+  { val: "overwhelmed",  emoji: "🌊",   en: "Emotionally overwhelmed",   hi: "Sab kuch zyada hai" },
+  { val: "distraction",  emoji: "✨",   en: "Want distraction",          hi: "Kuch aur sochna hai" },
+  { val: "silence",      emoji: "🌿",   en: "Want silence",              hi: "Bas chup rehna hai" },
+  { val: "okay",         emoji: "🙂",   en: "Actually okay",             hi: "Theek hoon" },
 ];
+
 const STRESS_OPTIONS = [
-  { val: "low", emoji: "🟢", en: "Low", hi: "Kam" },
+  { val: "low",    emoji: "🟢", en: "Low",    hi: "Kam" },
   { val: "medium", emoji: "🟡", en: "Medium", hi: "Thoda" },
-  { val: "high", emoji: "🔴", en: "High", hi: "Zyada" },
+  { val: "high",   emoji: "🔴", en: "High",   hi: "Zyada" },
 ];
-const PLAYLIST_MOODS = [
-  { id: "tired", emoji: "🌿", en: "Tired but trying", hi: "Thaka hua par koshish kar raha hoon", color: "#3d6b4f", search: "soft indie folk healing tired" },
-  { id: "numb", emoji: "🌫️", en: "Numb", hi: "Kuch feel nahi ho raha", color: "#5a6a7a", search: "ambient melancholic soft instrumental" },
-  { id: "2am", emoji: "🌙", en: "2AM thoughts", hi: "Raat ke khayalat", color: "#3d3d6b", search: "lofi chill late night calm" },
-  { id: "okay", emoji: "🌱", en: "Slowly okay", hi: "Dheere dheere theek ho raha hoon", color: "#4a7a5a", search: "healing hopeful indie soft" },
-  { id: "cry", emoji: "🌧️", en: "Need to cry", hi: "Rona chahta hoon", color: "#4a5a7a", search: "sad emotional cathartic songs" },
-  { id: "almost", emoji: "✨", en: "Almost good", hi: "Lagbhag theek hoon", color: "#7a6a3d", search: "feel good indie pop uplifting" },
-  { id: "panic", emoji: "🌊", en: "Panicking", hi: "Panic ho rahi hai", color: "#3d6a7a", search: "calming anxiety relief meditation" },
-];
+
 const PEER_SEEDS = [
   "Ek cup chai ne aaj bahut help ki. 🍵",
   "I told myself it's okay to not be okay. That helped.",
@@ -377,8 +396,8 @@ function PeerNotes({ onBack, hi }) {
 export default function App() {
   const [screen,   setScreen]   = useState("home");
   const [hi,       setHi]       = useState(()=>load("hi",false));
-  const [name,     setName]     = useState(()=>load("name",""));
-  const [nameInput,setNameInput]= useState("");
+  // Skip onboarding — go straight in
+  const [name,     setName]     = useState(()=>load("name","friend"));
   const [checkins, setCheckins] = useState(()=>load("checkins",[]));
   const [mood,     setMood]     = useState(null);
   const [stress,   setStress]   = useState(null);
@@ -387,7 +406,6 @@ export default function App() {
   const [txt,      setTxt]      = useState("");
   const [loading,  setLoading]  = useState(false);
   const [breath,   setBreath]   = useState(null);
-  const [pmood,    setPmood]    = useState(null);
   const [journal,  setJournal]  = useState("");
   const [jEntries, setJEntries] = useState(()=>load("journal",[]));
   const [jSaved,   setJSaved]   = useState(false);
@@ -418,7 +436,7 @@ export default function App() {
     if (checkins.length < 3) return null;
     const r = checkins.slice(-7);
     const hs = r.filter(c=>c.stress==="high").length;
-    const lm = r.filter(c=>c.mood==="low").length;
+    const lm = r.filter(c=>["numb","exhausted","overwhelmed","lonely","unseen"].includes(c.mood)).length;
     if (hs>=3) return T("I've noticed stress coming up often. You don't have to carry that alone.","Maine notice kiya — stress kaafi baar aa raha hai. Akele mat uthao ise.");
     if (lm>=3) return T("You've been having some heavy days. That takes real strength.","Kaafi bhaari din rhe hain. Yeh himmat hai.");
     return null;
@@ -432,7 +450,7 @@ export default function App() {
 
   const goTo = (s) => {
     setScreen(s); setCiDone(false); setMood(null); setStress(null);
-    setMsgs([]); setBreath(null); setPmood(null);
+    setMsgs([]); setBreath(null);
   };
 
   const sendMsg = async (override = null) => {
@@ -454,38 +472,10 @@ export default function App() {
     setTimeout(()=>setJSaved(false),3000);
   };
 
-  if (!name) return (
-    <div style={{...css, minHeight:"100vh", background:"var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", padding:24, fontFamily:"var(--body)"}}>
-      <style>{`@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}`}</style>
-      <div style={{ maxWidth:360, width:"100%", textAlign:"center", display:"flex", flexDirection:"column", alignItems:"center", gap:28 }}>
-        <span style={{ fontSize:60 }}>🌱</span>
-        <div>
-          <h1 style={{ fontFamily:"var(--display)", fontSize:40, color:"var(--text)", marginBottom:10 }}>SAHARA</h1>
-          <p style={{ color:"var(--muted)", fontSize:16, lineHeight:1.7 }}>
-            {T("Quiet support when things feel too much.","Jab sab kuch zyada lagey — main hoon yahan.")}
-          </p>
-        </div>
-        <p style={{ color:"var(--text2)", fontSize:15 }}>{T("What should I call you?","Main tumhe kya bulaaon?")}</p>
-        <input value={nameInput} onChange={e=>setNameInput(e.target.value)}
-          onKeyDown={e=>{ if(e.key==="Enter"&&nameInput.trim()){ save("name",nameInput.trim()); setName(nameInput.trim()); }}}
-          placeholder={T("Your name...","Tumhara naam...")}
-          autoFocus style={{ ...input, textAlign:"center", fontSize:16, borderRadius:24 }}
-        />
-        <button onClick={()=>{ if(nameInput.trim()){ save("name",nameInput.trim()); setName(nameInput.trim()); }}}
-          disabled={!nameInput.trim()} style={{ ...btn(), opacity:nameInput.trim()?1:0.4 }}>
-          {T("I'm ready","Main ready hoon")} →
-        </button>
-        <p style={{ color:"var(--muted)", fontSize:12, lineHeight:1.7 }}>
-          {T("Your name stays here. Everything you share stays private.","Tumhara naam yaheen rehta hai. Sab kuch private hai.")}
-        </p>
-      </div>
-    </div>
-  );
-
   const titles = {
     home:null, checkin:T("Check in","Check in"), panic:T("Breathe with me","Mere saath saans lo"),
     talk:T("I'm listening","Sun rahi hoon"), overthinking:T("Quiet the noise","Shor band karo"),
-    playlists:T("Mood playlist","Mood playlist"), journal:T("Quiet journal","Quiet journal"),
+    journal:T("Quiet journal","Quiet journal"),
     letter:T("Letter to future me","Future me ko letter"), inbox:T("Your letters","Tumhare letters"),
     peers:T("What helped others","Doosron ne kya kiya"),
   };
@@ -498,8 +488,8 @@ export default function App() {
           {night && (
             <div style={{ ...card, borderColor:"var(--accent)", background:"rgba(46,122,80,.06)" }}>
               <p style={{ color:"var(--text2)", fontSize:14, lineHeight:1.8 }}>
-                🌙 {T(`It's late, ${name}. You don't have to figure anything out right now. I'm just here.`,
-                       `Raat ka waqt hai, ${name}. Abhi kuch bhi solve karne ki zaroorat nahi. Main bas hoon yahan.`)}
+                🌙 {T("It's late. You don't have to figure anything out right now. I'm just here.",
+                       "Raat ka waqt hai. Abhi kuch bhi solve karne ki zaroorat nahi. Main bas hoon yahan.")}
               </p>
             </div>
           )}
@@ -514,7 +504,6 @@ export default function App() {
               { s:"panic",        emoji:"🌊", en:"I'm overwhelmed",     hi:"Bahut zyada ho gaya",  sub_en:"Let's slow down",          sub_hi:"Dheere chalte hain" },
               { s:"talk",         emoji:"🌙", en:"Just talk",           hi:"Bas baat karni hai",   sub_en:"I'm listening",            sub_hi:"Main sun rahi hoon" },
               { s:"overthinking", emoji:"🧠", en:"Overthinking",        hi:"Zyada soch raha hoon", sub_en:"Quiet the noise",          sub_hi:"Shor band karte hain" },
-              { s:"playlists",    emoji:"🎵", en:"Mood playlist",       hi:"Mood ki playlist",     sub_en:"Music for how you feel",   sub_hi:"Feelings ke liye music" },
               { s:"journal",      emoji:"📓", en:"Quiet journal",       hi:"Quiet journal",        sub_en:"Write it out",             sub_hi:"Likh do" },
               { s:"letter",       emoji:"✉️", en:"Letter to future me", hi:"Future me ko letter",  sub_en:"Write. Wait. Read.",       sub_hi:"Likho. Ruko. Padho." },
               { s:"peers",        emoji:"🤝", en:"What helped others",  hi:"Doosron ne kya kiya",  sub_en:"Anonymous notes",          sub_hi:"Anonymous notes" },
@@ -538,14 +527,16 @@ export default function App() {
                 {T("Your recent days","Haale ke din")}
               </p>
               <div style={{ display:"flex", gap:8, flexWrap:"wrap", marginBottom:12 }}>
-                {checkins.slice(-10).map((c,i)=>(
-                  <div key={i} style={{
-                    background: c.mood==="good"?"rgba(46,122,80,.15)":c.mood==="low"?"rgba(120,60,60,.15)":"var(--surface2)",
-                    borderRadius:10, padding:"6px 12px", fontSize:13,
-                  }}>
-                    {c.mood==="low"?"😔":c.mood==="good"?"🙂":"😐"}{c.stress==="high"?" ⚡":""}
-                  </div>
-                ))}
+                {checkins.slice(-10).map((c,i)=>{
+                  const m = MOOD_OPTIONS.find(x=>x.val===c.mood);
+                  return (
+                    <div key={i} style={{
+                      background:"var(--surface2)", borderRadius:10, padding:"6px 12px", fontSize:13,
+                    }}>
+                      {m?.emoji||"😐"}{c.stress==="high"?" ⚡":""}
+                    </div>
+                  );
+                })}
               </div>
               <p style={{ fontSize:12, color:"var(--muted)" }}>
                 {checkins.length} {T("check-ins. That's","check-ins. Yeh hai")} {checkins.length} {T("times you chose yourself.","baar khud ko choose kiya.")}
@@ -559,16 +550,16 @@ export default function App() {
         <div style={{ display:"flex", flexDirection:"column", gap:22 }}>
           {!ciDone ? (<>
             <p style={{ color:"var(--muted)", fontSize:15 }}>{T("How are you feeling right now?","Abhi kaisa feel ho raha hai?")}</p>
-            <div style={{ display:"flex", gap:12 }}>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
               {MOOD_OPTIONS.map(m=>(
                 <button key={m.val} onClick={()=>setMood(m.val)} style={{
-                  flex:1, background:mood===m.val?"var(--accent)":"var(--surface2)",
+                  background:mood===m.val?"var(--accent)":"var(--surface2)",
                   border:"1px solid "+(mood===m.val?"var(--accent)":"var(--border)"),
-                  borderRadius:16, padding:"16px 8px", cursor:"pointer",
-                  display:"flex", flexDirection:"column", alignItems:"center", gap:8,
+                  borderRadius:14, padding:"12px 10px", cursor:"pointer",
+                  display:"flex", alignItems:"center", gap:10, textAlign:"left",
                 }}>
-                  <span style={{ fontSize:28 }}>{m.emoji}</span>
-                  <span style={{ fontSize:13, color:mood===m.val?"#fff":"var(--text2)" }}>{hi?m.hi:m.en}</span>
+                  <span style={{ fontSize:20 }}>{m.emoji}</span>
+                  <span style={{ fontSize:13, color:mood===m.val?"#fff":"var(--text2)", lineHeight:1.3 }}>{hi?m.hi:m.en}</span>
                 </button>
               ))}
             </div>
@@ -596,9 +587,9 @@ export default function App() {
                 {T("Thank you for checking in.","Check in karne ke liye shukriya.")}
               </h2>
               <p style={{ color:"var(--muted)", fontSize:15, lineHeight:1.8 }}>
-                {mood==="low" ? T("Hard days are real. You showed up anyway.","Mushkil din sach mein hote hain. Phir bhi aaye.")
-                  : mood==="good" ? T("Hold onto that. It counts.","Ise pakde raho. Yeh matter karta hai.")
-                  : T("Okay is enough. You're here.","Okay kaafi hai. Tum yahan ho.")}
+                {mood==="okay" || mood==="distraction"
+                  ? T("Hold onto that. It counts.","Ise pakde raho. Yeh matter karta hai.")
+                  : T("You showed up for yourself today. That matters.","Aaj khud ke liye aaye. Yeh matter karta hai.")}
               </p>
               {insight && <div style={{ ...card, borderColor:"var(--accent)", maxWidth:320 }}><p style={{ color:"var(--text2)", fontSize:14, lineHeight:1.8 }}>🌿 {insight}</p></div>}
               <button onClick={()=>goTo("home")} style={btn()}>{T("← Back","← Wapas")}</button>
@@ -664,8 +655,8 @@ export default function App() {
           <div style={{ display:"flex", flexDirection:"column", gap:14, minHeight:msgs.length>0?200:0 }}>
             {msgs.length===0 && screen==="talk" && (
               <p style={{ color:"var(--muted)", fontSize:15, lineHeight:1.9 }}>
-                🌙 {T(`I'm here, ${name}. You don't have to explain anything. Just say whatever's on your mind.`,
-                       `Main hoon yahan, ${name}. Kuch explain karne ki zaroorat nahi. Jo dil mein hai, bol do.`)}
+                🌙 {T("I'm here. You don't have to explain anything. Just say whatever's on your mind.",
+                       "Main hoon yahan. Kuch explain karne ki zaroorat nahi. Jo dil mein hai, bol do.")}
               </p>
             )}
             {msgs.map((m,i)=><Bubble key={i} msg={m}/>)}
@@ -683,42 +674,6 @@ export default function App() {
               ↑
             </button>
           </div>
-        </div>
-      );
-
-      case "playlists": return (
-        <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-          <p style={{ color:"var(--muted)", fontSize:15 }}>{T("How are you feeling right now?","Abhi kaisa feel ho raha hai?")}</p>
-          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
-            {PLAYLIST_MOODS.map(m=>(
-              <button key={m.id} onClick={()=>setPmood(m)} style={{
-                background: pmood?.id===m.id ? m.color : "var(--surface)",
-                border:"1px solid "+(pmood?.id===m.id?m.color:"var(--border)"),
-                borderRadius:16, padding:"16px 14px", cursor:"pointer", textAlign:"left", transition:"all .2s",
-              }}>
-                <p style={{ fontSize:24, marginBottom:6 }}>{m.emoji}</p>
-                <p style={{ fontSize:13, color:pmood?.id===m.id?"#fff":"var(--text)", fontWeight:500 }}>{hi?m.hi:m.en}</p>
-              </button>
-            ))}
-          </div>
-          {pmood && (
-            <div style={{ ...card, borderColor:"var(--accent)" }}>
-              <p style={{ fontSize:28, marginBottom:12 }}>{pmood.emoji}</p>
-              <h3 style={{ fontFamily:"var(--display)", fontSize:20, color:"var(--text)", marginBottom:16 }}>{hi?pmood.hi:pmood.en}</h3>
-              <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-                <a href={`https://open.spotify.com/search/${encodeURIComponent(pmood.search)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{ ...btn(), textDecoration:"none", fontSize:14, padding:"10px 20px" }}>
-                  🎵 Spotify
-                </a>
-                <a href={`https://www.youtube.com/results?search_query=${encodeURIComponent(pmood.search)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  style={{ ...btn(false), textDecoration:"none", fontSize:14, padding:"10px 20px" }}>
-                  ▶ YouTube
-                </a>
-              </div>
-            </div>
-          )}
         </div>
       );
 
@@ -786,7 +741,7 @@ export default function App() {
               <span style={{ fontSize:22 }}>🌱</span>
               <div>
                 <p style={{ fontFamily:"var(--display)", fontSize:20, color:"var(--text)", lineHeight:1.2 }}>SAHARA</p>
-                <p style={{ fontSize:11, color:"var(--muted)" }}>{greeting(hi)}, {name}</p>
+                <p style={{ fontSize:11, color:"var(--muted)" }}>{greeting(hi)}</p>
               </div>
             </div>
           ) : (
